@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PotholeVision Operations</title>
+  <link rel="stylesheet" href="/app/styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">PV</span><span>PotholeVision</span></div>
+    <nav aria-label="Main navigation">
+      <button class="nav-item active" data-view="overview">Overview</button>
+      <button class="nav-item" data-view="detect">AI detection</button>
+      <button class="nav-item" data-view="potholes">Potholes</button>
+      <button class="nav-item" data-view="operations">Operations</button>
+    </nav>
+    <div class="sidebar-footer"><span class="connection-dot"></span><span id="connection-label">API online</span></div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div><p class="eyebrow" id="section-label">Operations centre</p><h1 id="page-title">Network overview</h1></div>
+      <div class="user-area"><span id="user-name">Guest access</span><button class="icon-button" id="open-auth" title="Sign in">Sign in</button></div>
+    </header>
+
+    <section id="overview" class="view active">
+      <div class="metric-grid">
+        <article class="metric"><span>Total reports</span><strong id="total-potholes">--</strong><small>Recorded road defects</small></article>
+        <article class="metric accent-red"><span>Needs attention</span><strong id="open-potholes">--</strong><small>Detected or assigned</small></article>
+        <article class="metric accent-green"><span>Work orders</span><strong id="total-orders">--</strong><small>Repair activity</small></article>
+        <article class="metric accent-blue"><span>Verified repairs</span><strong id="verified-potholes">--</strong><small>Closed by inspection</small></article>
+      </div>
+      <section class="panel split-panel">
+        <div><div class="panel-heading"><div><h2>Severity distribution</h2><p>Current defects by recorded severity</p></div></div><div id="severity-chart" class="severity-chart"></div></div>
+        <div class="activity"><div class="panel-heading"><div><h2>System status</h2><p>Live API and model availability</p></div></div><div class="status-row"><span class="connection-dot"></span>Detection API ready</div><div class="status-row"><span class="connection-dot"></span>Database connected</div><a class="text-link" href="/docs" target="_blank" rel="noreferrer">Open API documentation</a></div>
+      </section>
+    </section>
+
+    <section id="detect" class="view">
+      <section class="panel detection-layout">
+        <div><p class="eyebrow">AI-assisted assessment</p><h2>Analyse a road image</h2><p class="muted">Upload a clear road image to locate potholes using the trained model.</p><label class="upload-zone" for="image-file"><input id="image-file" type="file" accept="image/*"><span id="file-label">Choose an image</span><small>JPG, PNG, or WebP</small></label><button id="detect-button" class="primary-button">Run detection</button></div>
+        <div class="detection-result" id="detection-result"><span class="empty-mark">AI</span><h3>Awaiting image</h3><p>Select a road image to begin analysis.</p></div>
+      </section>
+    </section>
+
+    <section id="potholes" class="view">
+      <div class="section-actions"><div><h2>Reported potholes</h2><p class="muted">Review field reports and update their lifecycle.</p></div><button class="primary-button" id="new-pothole">Add report</button></div>
+      <section class="panel table-panel"><table><thead><tr><th>ID</th><th>Location</th><th>Severity</th><th>Priority</th><th>Status</th></tr></thead><tbody id="pothole-rows"></tbody></table><p class="empty-table" id="pothole-empty">No potholes have been reported yet.</p></section>
+    </section>
+
+    <section id="operations" class="view">
+      <div class="two-column">
+        <section><div class="section-actions"><div><h2>Contractors</h2><p class="muted">Available repair teams.</p></div><button class="secondary-button" id="new-contractor">Add contractor</button></div><section class="panel table-panel"><table><thead><tr><th>Name</th><th>Company</th><th>Contact</th><th>Status</th></tr></thead><tbody id="contractor-rows"></tbody></table><p class="empty-table" id="contractor-empty">No contractors added.</p></section></section>
+        <section><div class="section-actions"><div><h2>Work orders</h2><p class="muted">Repair jobs in progress.</p></div><button class="secondary-button" id="new-order">Create order</button></div><section class="panel table-panel"><table><thead><tr><th>Order</th><th>Pothole</th><th>Priority</th><th>Status</th></tr></thead><tbody id="order-rows"></tbody></table><p class="empty-table" id="order-empty">No work orders created.</p></section></section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="auth-dialog"><form method="dialog" class="modal" id="auth-form"><button class="close-button" value="cancel" title="Close">Close</button><p class="eyebrow">Secure access</p><h2>Sign in to manage work</h2><label>Email<input id="auth-email" type="email" required placeholder="you@example.com"></label><label>Password<input id="auth-password" type="password" required minlength="8" placeholder="Minimum 8 characters"></label><div class="modal-actions"><button class="secondary-button" type="button" id="register-button">Create account</button><button class="primary-button" value="default">Sign in</button></div><p id="auth-message" class="form-message"></p></form></dialog>
+  <dialog id="create-dialog"><form method="dialog" class="modal" id="create-form"><button class="close-button" value="cancel" title="Close">Close</button><p class="eyebrow" id="form-kicker">New record</p><h2 id="form-title">Add report</h2><div id="form-fields"></div><div class="modal-actions"><button class="secondary-button" value="cancel">Cancel</button><button class="primary-button" value="default">Save</button></div><p id="create-message" class="form-message"></p></form></dialog>
+  <div id="toast" role="status"></div>
+  <script src="/app/app.js"></script>
+</body>
+</html>
