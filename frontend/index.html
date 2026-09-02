@@ -4,77 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>PotholeVision Operations</title>
+    <title>PotholeVision | Smart Road Intelligence</title>
 
-    <!-- IMPORTANT: Render Static Site paths -->
     <link rel="stylesheet" href="styles.css">
-
-    <!-- IMPORTANT: Load JS after HTML is ready -->
     <script src="app.js" defer></script>
 </head>
 
 <body>
 
-<div class="app-shell">
+<!-- =========================
+     APP
+========================= -->
+<div class="app">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <!-- MOBILE HEADER -->
+    <header class="mobile-header">
 
-        <div class="brand">
-            <div class="brand-mark">PV</div>
-            <div class="brand-name">PotholeVision</div>
+        <button class="menu-btn" id="menu-btn">
+            ☰
+        </button>
+
+        <div class="mobile-logo">
+            <span>PV</span>
+            PotholeVision
         </div>
 
-        <nav class="nav">
+        <button class="mobile-user" id="mobile-user">
+            ●
+        </button>
 
-            <button class="nav-item active" data-view="overview">
-                Overview
+    </header>
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-box">
+                PV
+            </div>
+
+            <div>
+                <strong>Pothole</strong>
+                <span>VISION</span>
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-label">
+            MAIN MENU
+        </div>
+
+
+        <nav>
+
+            <button
+                class="nav-item active"
+                data-page="dashboard">
+
+                <span>⌂</span>
+                Dashboard
+
             </button>
 
-            <button class="nav-item" data-view="detection">
-                AI detection
+
+            <button
+                class="nav-item"
+                data-page="detection">
+
+                <span>◈</span>
+                AI Detection
+
             </button>
 
-            <button class="nav-item" data-view="potholes">
+
+            <button
+                class="nav-item"
+                data-page="potholes">
+
+                <span>●</span>
                 Potholes
+
             </button>
 
-            <button class="nav-item" data-view="operations">
+
+            <button
+                class="nav-item"
+                data-page="operations">
+
+                <span>▣</span>
                 Operations
+
             </button>
 
         </nav>
 
+
+        <div class="sidebar-label">
+            SYSTEM
+        </div>
+
+
+        <nav>
+
+            <button
+                class="nav-item"
+                id="api-status-btn">
+
+                <span class="green-dot"></span>
+                API Status
+
+            </button>
+
+
+            <button
+                class="nav-item"
+                id="docs-btn">
+
+                <span>↗</span>
+                API Documentation
+
+            </button>
+
+        </nav>
+
+
         <div class="sidebar-bottom">
-            <span class="status-dot"></span>
-            <span>API online</span>
+
+            <div class="online-status">
+                <span class="green-dot"></span>
+                <span id="connection-text">
+                    API Online
+                </span>
+            </div>
+
+            <div class="version">
+                PotholeVision v1.0
+            </div>
+
         </div>
 
     </aside>
 
 
-    <!-- MAIN -->
-    <main class="main-content">
+    <!-- =========================
+         MAIN CONTENT
+    ========================= -->
+    <main class="main">
 
-        <!-- HEADER -->
+
+        <!-- TOPBAR -->
         <header class="topbar">
 
             <div>
-                <div class="eyebrow">OPERATIONS CENTRE</div>
-                <h1 id="page-title">Network overview</h1>
+
+                <div class="breadcrumb">
+                    OPERATIONS CENTER
+                </div>
+
+                <h1 id="page-heading">
+                    Dashboard
+                </h1>
+
             </div>
 
-            <div class="topbar-actions">
 
-                <span id="user-name">
-                    Guest access
-                </span>
+            <div class="top-actions">
+
+                <div class="notification">
+                    <button id="notification-btn">
+                        ♢
+                    </button>
+
+                    <span id="notification-count">
+                        0
+                    </span>
+                </div>
+
 
                 <button
-                    type="button"
-                    class="button secondary"
+                    class="user-button"
                     id="open-auth">
-                    Sign in
+
+                    <span class="user-avatar">
+                        G
+                    </span>
+
+                    <span id="user-name">
+                        Guest
+                    </span>
+
+                    <span>⌄</span>
+
                 </button>
 
             </div>
@@ -82,184 +207,501 @@
         </header>
 
 
-        <!-- OVERVIEW -->
-        <section class="view active" id="view-overview">
+        <!-- =========================
+             DASHBOARD PAGE
+        ========================= -->
+        <section
+            class="page active"
+            id="page-dashboard">
 
-            <div class="metrics-grid">
 
-                <div class="metric-card">
-                    <div class="metric-label">Total reports</div>
-                    <div class="metric-value" id="total-potholes">--</div>
-                    <div class="metric-description">
-                        Recorded road defects
-                    </div>
+            <div class="welcome">
+
+                <div>
+
+                    <span class="yellow-tag">
+                        SMART ROAD INTELLIGENCE
+                    </span>
+
+                    <h2>
+                        Monitor roads.<br>
+                        <span>Fix problems faster.</span>
+                    </h2>
+
+                    <p>
+                        Use AI-powered detection to identify potholes
+                        and manage road repairs from one place.
+                    </p>
+
                 </div>
 
-                <div class="metric-card danger">
-                    <div class="metric-label">Needs attention</div>
-                    <div class="metric-value" id="open-potholes">--</div>
-                    <div class="metric-description">
-                        Detected or assigned
+
+                <button
+                    class="yellow-btn"
+                    data-page="detection">
+
+                    Start AI Detection
+                    <span>→</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- METRICS -->
+
+            <div class="metrics">
+
+                <div class="metric">
+
+                    <div class="metric-icon yellow">
+                        ◉
                     </div>
+
+                    <div>
+
+                        <span>
+                            TOTAL POTHOLES
+                        </span>
+
+                        <strong id="total-potholes">
+                            --
+                        </strong>
+
+                    </div>
+
                 </div>
 
-                <div class="metric-card success">
-                    <div class="metric-label">Work orders</div>
-                    <div class="metric-value" id="total-orders">--</div>
-                    <div class="metric-description">
-                        Repair activity
+
+                <div class="metric">
+
+                    <div class="metric-icon red">
+                        !
                     </div>
+
+                    <div>
+
+                        <span>
+                            NEEDS ATTENTION
+                        </span>
+
+                        <strong id="open-potholes">
+                            --
+                        </strong>
+
+                    </div>
+
                 </div>
 
-                <div class="metric-card primary">
-                    <div class="metric-label">Verified repairs</div>
-                    <div class="metric-value" id="verified-potholes">--</div>
-                    <div class="metric-description">
-                        Closed by inspection
+
+                <div class="metric">
+
+                    <div class="metric-icon blue">
+                        ▣
                     </div>
+
+                    <div>
+
+                        <span>
+                            WORK ORDERS
+                        </span>
+
+                        <strong id="total-orders">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-icon green">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            VERIFIED REPAIRS
+                        </span>
+
+                        <strong id="verified-potholes">
+                            --
+                        </strong>
+
+                    </div>
+
                 </div>
 
             </div>
 
 
-            <div class="panel-grid">
+            <!-- DASHBOARD GRID -->
+
+            <div class="dashboard-grid">
+
 
                 <!-- SEVERITY -->
-                <div class="panel">
 
-                    <div class="panel-header">
-                        <h2>Severity distribution</h2>
-                        <p>Current defects by recorded severity</p>
+                <div class="card large-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Severity Distribution
+                            </h3>
+
+                            <p>
+                                Current detected road defects
+                            </p>
+
+                        </div>
+
+                        <span class="card-badge">
+                            LIVE
+                        </span>
+
                     </div>
 
-                    <div id="severity-chart" class="severity-chart"></div>
+
+                    <div
+                        class="severity-chart"
+                        id="severity-chart">
+
+                        <div class="empty-chart">
+                            Loading data...
+                        </div>
+
+                    </div>
 
                 </div>
 
 
-                <!-- SYSTEM STATUS -->
-                <div class="panel">
+                <!-- SYSTEM -->
 
-                    <div class="panel-header">
-                        <h2>System status</h2>
-                        <p>Live API and model availability</p>
-                    </div>
+                <div class="card">
 
-                    <div class="status-list">
+                    <div class="card-header">
 
-                        <div class="status-row">
-                            <span class="status-dot"></span>
-                            <span>Detection API ready</span>
+                        <div>
+
+                            <h3>
+                                System Status
+                            </h3>
+
+                            <p>
+                                Platform health
+                            </p>
+
                         </div>
 
-                        <div class="status-row">
-                            <span class="status-dot"></span>
-                            <span>Database connected</span>
-                        </div>
+                        <span class="status-pill">
+                            HEALTHY
+                        </span>
 
                     </div>
 
-                    <a
-                        href="https://potholevision-api.onrender.com/docs"
-                        target="_blank"
-                        rel="noopener noreferrer">
-                        Open API documentation
-                    </a>
+
+                    <div class="system-list">
+
+                        <div class="system-item">
+
+                            <span class="system-icon green">
+                                ✓
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Detection API
+                                </strong>
+
+                                <small>
+                                    Ready
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="system-item">
+
+                            <span class="system-icon green">
+                                ✓
+                            </span>
+
+                            <div>
+                                <strong>
+                                    Database
+                                </strong>
+
+                                <small>
+                                    Connected
+                                </small>
+                            </div>
+
+                        </div>
+
+
+                        <div class="system-item">
+
+                            <span class="system-icon yellow">
+                                ◈
+                            </span>
+
+                            <div>
+                                <strong>
+                                    AI Model
+                                </strong>
+
+                                <small>
+                                    Available
+                                </small>
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
             </div>
 
-        </section>
 
+            <!-- RECENT REPORTS -->
 
-        <!-- AI DETECTION -->
-        <section class="view" id="view-detection">
+            <div class="card">
 
-            <div class="section-header">
-                <div>
-                    <div class="eyebrow">COMPUTER VISION</div>
-                    <h2>AI pothole detection</h2>
-                    <p>
-                        Upload a road image and let the model detect potholes.
-                    </p>
-                </div>
-            </div>
+                <div class="card-header">
 
+                    <div>
 
-            <div class="panel detection-panel">
+                        <h3>
+                            Recent Pothole Reports
+                        </h3>
 
-                <div class="upload-area">
-
-                    <input
-                        type="file"
-                        id="image-file"
-                        accept="image/*"
-                        hidden>
-
-                    <label
-                        for="image-file"
-                        class="upload-box">
-
-                        <div class="upload-icon">↑</div>
-
-                        <h3>Upload road image</h3>
-
-                        <p id="file-label">
-                            Choose a pothole image
+                        <p>
+                            Latest road defect records
                         </p>
 
-                    </label>
+                    </div>
+
+                    <button
+                        class="text-btn"
+                        data-page="potholes">
+
+                        View all →
+                    </button>
 
                 </div>
 
 
-                <button
-                    type="button"
-                    class="button primary"
-                    id="detect-button">
-                    Detect potholes
-                </button>
-
-
-                <div
-                    id="detection-result"
-                    class="detection-result">
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- POTHOLES -->
-        <section class="view" id="view-potholes">
-
-            <div class="section-header">
-
-                <div>
-                    <div class="eyebrow">ROAD DEFECTS</div>
-                    <h2>Potholes</h2>
-                    <p>View and manage reported potholes.</p>
-                </div>
-
-                <button
-                    type="button"
-                    class="button primary"
-                    id="new-pothole">
-                    Add report
-                </button>
-
-            </div>
-
-
-            <div class="panel">
-
-                <div class="table-container">
+                <div class="table-wrapper">
 
                     <table>
 
                         <thead>
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Location</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="dashboard-pothole-rows">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             AI DETECTION PAGE
+        ========================= -->
+        <section
+            class="page"
+            id="page-detection">
+
+            <div class="page-intro">
+
+                <span class="yellow-tag">
+                    COMPUTER VISION
+                </span>
+
+                <h2>
+                    AI Pothole Detection
+                </h2>
+
+                <p>
+                    Upload a road image and let PotholeVision
+                    automatically identify potholes.
+                </p>
+
+            </div>
+
+
+            <div class="detection-layout">
+
+
+                <div class="card upload-card">
+
+                    <div
+                        class="upload-area"
+                        id="upload-area">
+
+                        <input
+                            type="file"
+                            id="image-file"
+                            accept="image/*"
+                            hidden>
+
+
+                        <div class="upload-icon">
+                            ↑
+                        </div>
+
+
+                        <h3>
+                            Upload road image
+                        </h3>
+
+
+                        <p id="file-label">
+                            Drag & drop an image here or
+                            click to browse
+                        </p>
+
+
+                        <label
+                            for="image-file"
+                            class="browse-btn">
+
+                            Choose Image
+
+                        </label>
+
+
+                        <small>
+                            JPG, PNG or WEBP
+                        </small>
+
+                    </div>
+
+
+                    <button
+                        class="yellow-btn full-btn"
+                        id="detect-button">
+
+                        <span>◈</span>
+                        Detect Potholes
+
+                    </button>
+
+                </div>
+
+
+                <div class="card result-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Detection Results
+                            </h3>
+
+                            <p>
+                                AI analysis output
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="detection-result"
+                        class="detection-result">
+
+                        <div class="result-placeholder">
+
+                            <div>
+                                ◈
+                            </div>
+
+                            <p>
+                                Detection results will
+                                appear here
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             POTHOLES PAGE
+        ========================= -->
+        <section
+            class="page"
+            id="page-potholes">
+
+            <div class="page-intro-row">
+
+                <div>
+
+                    <span class="yellow-tag">
+                        ROAD DEFECTS
+                    </span>
+
+                    <h2>
+                        Pothole Reports
+                    </h2>
+
+                    <p>
+                        Manage all reported road defects.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="yellow-btn"
+                    id="new-pothole">
+
+                    + Add Report
+
+                </button>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
                             <tr>
                                 <th>ID</th>
                                 <th>Location</th>
@@ -267,19 +709,24 @@
                                 <th>Status</th>
                                 <th>Created</th>
                             </tr>
+
                         </thead>
 
                         <tbody id="pothole-rows">
+
                         </tbody>
 
                     </table>
 
                 </div>
 
+
                 <div
-                    id="pothole-empty"
-                    class="empty-state">
-                    No potholes found.
+                    class="empty-state"
+                    id="pothole-empty">
+
+                    No pothole reports found.
+
                 </div>
 
             </div>
@@ -287,103 +734,156 @@
         </section>
 
 
-        <!-- OPERATIONS -->
-        <section class="view" id="view-operations">
+        <!-- =========================
+             OPERATIONS PAGE
+        ========================= -->
+        <section
+            class="page"
+            id="page-operations">
 
-            <div class="section-header">
+            <div class="page-intro">
 
-                <div>
-                    <div class="eyebrow">FIELD OPERATIONS</div>
-                    <h2>Operations</h2>
-                    <p>Manage contractors and work orders.</p>
-                </div>
+                <span class="yellow-tag">
+                    FIELD OPERATIONS
+                </span>
 
-            </div>
+                <h2>
+                    Operations
+                </h2>
 
-
-            <!-- CONTRACTORS -->
-            <div class="panel">
-
-                <div class="panel-header">
-                    <h2>Contractors</h2>
-
-                    <button
-                        type="button"
-                        class="button secondary"
-                        id="new-contractor">
-                        Add contractor
-                    </button>
-                </div>
-
-
-                <div class="table-container">
-
-                    <table>
-
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Contact</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-
-                        <tbody id="contractor-rows">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                <div
-                    id="contractor-empty"
-                    class="empty-state">
-                    No contractors found.
-                </div>
+                <p>
+                    Manage contractors and road repair work.
+                </p>
 
             </div>
 
 
-            <!-- WORK ORDERS -->
-            <div class="panel">
+            <div class="operations-grid">
 
-                <div class="panel-header">
-                    <h2>Work orders</h2>
 
-                    <button
-                        type="button"
-                        class="button secondary"
-                        id="new-order">
-                        Create work order
-                    </button>
+                <!-- CONTRACTORS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <h3>
+                                Contractors
+                            </h3>
+
+                            <p>
+                                Repair teams
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="small-yellow-btn"
+                            id="new-contractor">
+
+                            + Add
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="contractor-rows">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div
+                        class="empty-state"
+                        id="contractor-empty">
+
+                        No contractors found.
+
+                    </div>
+
                 </div>
 
 
-                <div class="table-container">
+                <!-- WORK ORDERS -->
 
-                    <table>
+                <div class="card">
 
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Pothole</th>
-                                <th>Contractor</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
+                    <div class="card-header">
 
-                        <tbody id="order-rows">
-                        </tbody>
+                        <div>
 
-                    </table>
+                            <h3>
+                                Work Orders
+                            </h3>
 
-                </div>
+                            <p>
+                                Active repair jobs
+                            </p>
 
-                <div
-                    id="order-empty"
-                    class="empty-state">
-                    No work orders found.
+                        </div>
+
+                        <button
+                            class="small-yellow-btn"
+                            id="new-order">
+
+                            + Create
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="table-wrapper">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Pothole</th>
+                                    <th>Status</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="order-rows">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div
+                        class="empty-state"
+                        id="order-empty">
+
+                        No work orders found.
+
+                    </div>
+
                 </div>
 
             </div>
@@ -395,34 +895,40 @@
 </div>
 
 
-<!-- AUTH DIALOG -->
+<!-- =========================
+     AUTH MODAL
+========================= -->
 <dialog id="auth-dialog">
 
-    <form
-        method="dialog"
-        class="modal"
-        id="auth-form">
+    <div class="modal">
 
-        <div class="modal-header">
+        <button
+            class="modal-close"
+            id="close-auth">
 
-            <div>
-                <h2>Sign in</h2>
-                <p>Access your PotholeVision account.</p>
-            </div>
+            ×
 
-            <button
-                type="button"
-                class="modal-close"
-                id="close-auth">
-                ×
-            </button>
+        </button>
 
+
+        <div class="modal-logo">
+            PV
         </div>
 
 
-        <div class="form-fields">
+        <h2 id="auth-title">
+            Welcome back
+        </h2>
 
-            <label for="auth-email">
+
+        <p class="modal-subtitle">
+            Sign in to your PotholeVision account.
+        </p>
+
+
+        <form id="auth-form">
+
+            <label>
                 Email
             </label>
 
@@ -433,120 +939,130 @@
                 required>
 
 
-            <label for="auth-password">
+            <label>
                 Password
             </label>
 
             <input
                 type="password"
                 id="auth-password"
-                placeholder="Password"
+                placeholder="Enter password"
                 required>
 
-        </div>
 
-
-        <div
-            id="auth-message"
-            class="form-message">
-        </div>
-
-
-        <div class="modal-actions">
-
-            <button
-                type="button"
-                class="button secondary"
-                id="register-button">
-                Create account
-            </button>
-
-            <button
-                type="submit"
-                class="button primary">
-                Sign in
-            </button>
-
-        </div>
-
-    </form>
-
-</dialog>
-
-
-<!-- CREATE RECORD DIALOG -->
-<dialog id="create-dialog">
-
-    <form
-        method="dialog"
-        class="modal"
-        id="create-form">
-
-        <div class="modal-header">
-
-            <div>
-                <h2 id="form-title">
-                    Create record
-                </h2>
+            <div
+                id="auth-message"
+                class="form-message">
             </div>
 
-            <button
-                type="button"
-                class="modal-close"
-                id="close-create">
-                ×
-            </button>
-
-        </div>
-
-
-        <div
-            id="form-fields"
-            class="form-fields">
-        </div>
-
-
-        <div
-            id="create-message"
-            class="form-message">
-        </div>
-
-
-        <div class="modal-actions">
-
-            <button
-                type="button"
-                class="button secondary"
-                id="cancel-create">
-                Cancel
-            </button>
 
             <button
                 type="submit"
-                class="button primary">
-                Save
+                class="yellow-btn full-btn">
+
+                Sign In
+
             </button>
 
-        </div>
+        </form>
 
-    </form>
+
+        <button
+            class="switch-auth"
+            id="register-button">
+
+            Don't have an account?
+            <strong>Create account</strong>
+
+        </button>
+
+    </div>
 
 </dialog>
 
 
-<!-- TOAST -->
+<!-- =========================
+     CREATE MODAL
+========================= -->
+<dialog id="create-dialog">
+
+    <div class="modal">
+
+        <button
+            class="modal-close"
+            id="close-create">
+
+            ×
+
+        </button>
+
+
+        <h2 id="form-title">
+            Create Record
+        </h2>
+
+
+        <p class="modal-subtitle">
+            Add a new record to the system.
+        </p>
+
+
+        <form id="create-form">
+
+            <div id="form-fields"></div>
+
+
+            <div
+                id="create-message"
+                class="form-message">
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="cancel-create">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="yellow-btn">
+
+                    Save Record
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</dialog>
+
+
+<!-- =========================
+     TOAST
+========================= -->
 <div
     id="toast"
     class="toast">
+
 </div>
 
 
-<!-- CONNECTION STATUS -->
-<span
-    id="connection-label"
-    hidden>
-    API online
-</span>
+<!-- OVERLAY -->
+<div
+    class="sidebar-overlay"
+    id="sidebar-overlay">
+
+</div>
 
 </body>
 </html>
