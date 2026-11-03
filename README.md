@@ -77,13 +77,13 @@ The live map shows public-safe location, severity, and status data for GPS-tagge
 
 ## Supabase and deployment settings
 
-- The FastAPI service remains the application API. Supabase provides its hosted PostgreSQL database; it does not host this Python API process.
+- Supabase Auth handles frontend sign-in. Supabase also hosts PostgreSQL, which the FastAPI service uses for application data; it does not host this Python API process.
 - In Supabase, open **Project Settings → Database → Connection string** and copy the **Session pooler** URI. Set it as `DATABASE_URL` in `backend/.env` (or the backend host's environment). Keep the password private and URL-encode special characters in it. The backend accepts `postgres://` and `postgresql://` URLs and requires TLS for PostgreSQL connections.
 - The API creates its SQLAlchemy tables on startup. Keep the normal `public` schema selected and use the database password/role from the connection string. Existing SQLite data is not copied automatically; export/import it if you need to preserve local accounts and reports.
 - Set `CORS_ORIGINS` in the backend environment to a comma-separated list of the exact origins that serve your frontend, for example `https://your-app.vercel.app`. Include local Vite origins when developing locally.
 - Supabase stores the relational data. Uploaded images and videos are currently stored in the FastAPI server's `backend/uploads` directory, so use persistent disk or move those uploads to Supabase Storage before deploying the API on an ephemeral host.
 - `JWT_SECRET_KEY` is set to a local development value in the example. Replace it with a long random secret before making the backend public.
-- The production frontend defaults to the hosted API URL `https://potholevision.onrender.com`. Set `VITE_API_URL` in the frontend environment to point a deployed frontend at your own API.
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the frontend environment for Supabase Auth. Set `VITE_API_URL` to the URL of a deployed FastAPI service for reports, maps, AI detection, complaints, and administration. There is no production API default.
 
 ## API routes used by this frontend
 

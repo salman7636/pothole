@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { supabase } from './supabaseClient';
 import { createRoot } from 'react-dom/client';
 
 import {
@@ -21,14 +20,12 @@ import './mobile-ux.css';
 
 
 
-const API_ORIGIN = 'https://potholevision.onrender.com';
-
-const API = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : API_ORIGIN)).replace(/\/$/, '');
-
-const API_DOCS = `${API || API_ORIGIN}/docs`;
+const API = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 const MAP_TILE_URL = import.meta.env.VITE_MAP_TILE_URL || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
+const getSupabase = async () => (await import('./supabaseClient')).supabase;
 
 const pageItems = [
 
@@ -71,6 +68,9 @@ const googleMapsUrl = point => point?.latitude != null && point?.longitude != nu
 
 async function request(path, options = {}) {
 
+  if (!API && !import.meta.env.DEV) throw new Error('The application API is not configured. Set VITE_API_URL to the URL of the backend that provides reports, maps, and detection.');
+
+  const supabase = await getSupabase();
   const { data: sessionData } = await supabase?.auth.getSession() || { data: { session: null } };
   const token = sessionData.session?.access_token || sessionStorage.getItem('pv_token');
   if (token) sessionStorage.setItem('pv_token', token);
@@ -85,7 +85,7 @@ async function request(path, options = {}) {
 
   try { response = await fetch(`${API}${path}`, { ...options, headers }); }
 
-  catch { throw new Error(`Could not reach ${API || API_ORIGIN}. Start the backend and check the API URL.`); }
+  catch { throw new Error(`Could not reach ${API || 'the local development API'}. Check the API URL and backend availability.`); }
 
   const text = await response.text();
 
@@ -174,7 +174,8 @@ function Login({ onLogin }) {
     event.preventDefault(); setBusy(true); setError('');
 
     try {
-      if (!supabase) throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the frontend deployment settings.');
+      const supabase = await getSupabase();
+      if (!supabase) throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in the frontend deployment settings.');
       const registering = mode === 'register';
       const { data, error: authError } = registering
         ? await supabase.auth.signUp({ email, password, options: { data: { name, full_name: name } } })
@@ -972,11 +973,11 @@ function App() {
   useEffect(()=>{localStorage.setItem('pv_theme',themePreference);const media=window.matchMedia?.('(prefers-color-scheme: dark)');if(!media)return;const update=event=>setSystemDark(event.matches);setSystemDark(media.matches);media.addEventListener?.('change',update);return()=>media.removeEventListener?.('change',update)},[themePreference]);
 
 
-  useEffect(()=>{let cancelled=false;supabase?.auth.getSession().then(({data})=>{const session=data.session;const token=session?.access_token;if(token){sessionStorage.setItem('pv_token',token);sessionStorage.setItem('pv_dashboard_mode','citizen');const profile={id:session.user.id,email:session.user.email,name:session.user.user_metadata?.name||session.user.email.split('@')[0],role:'CITIZEN'};sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile);}}).finally(()=>{if(!cancelled){const token=sessionStorage.getItem('pv_token');if(!token){setAuthChecking(false);return;}request('/auth/me').then(profile=>{if(sessionStorage.getItem('pv_dashboard_mode')==='citizen')profile.role='CITIZEN';sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile)}).catch(error=>{if(error.message.includes('HTTP 401')){sessionStorage.removeItem('pv_token');sessionStorage.removeItem('pv_user');setUser(null)}}).finally(()=>setAuthChecking(false));}});return()=>{cancelled=true}},[]);
+  useEffect(()=>{let cancelled=false;getSupabase().then(supabase=>supabase?.auth.getSession()).then(({data}={data:{session:null}})=>{const session=data.session;const token=session?.access_token;if(token){sessionStorage.setItem('pv_token',token);sessionStorage.setItem('pv_dashboard_mode','citizen');const profile={id:session.user.id,email:session.user.email,name:session.user.user_metadata?.name||session.user.email.split('@')[0],role:'CITIZEN'};sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile);}}).finally(()=>{if(!cancelled){const token=sessionStorage.getItem('pv_token');if(!token){setAuthChecking(false);return;}request('/auth/me').then(profile=>{if(sessionStorage.getItem('pv_dashboard_mode')==='citizen')profile.role='CITIZEN';sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile)}).catch(error=>{if(error.message.includes('HTTP 401')){sessionStorage.removeItem('pv_token');sessionStorage.removeItem('pv_user');setUser(null)}}).finally(()=>setAuthChecking(false));}});return()=>{cancelled=true}},[]);
 
   const theme=themePreference==='system'?(systemDark?'dark':'light'):themePreference;
 
-  function logout(){supabase?.auth.signOut();['pv_token','pv_user','pv_citizen_token','pv_citizen_user','pv_official_token','pv_official_user','pv_dashboard_mode'].forEach(key=>sessionStorage.removeItem(key));setUser(null)}
+  function logout(){getSupabase().then(supabase=>supabase?.auth.signOut());['pv_token','pv_user','pv_citizen_token','pv_citizen_user','pv_official_token','pv_official_user','pv_dashboard_mode'].forEach(key=>sessionStorage.removeItem(key));setUser(null)}
 
   if(authChecking)return <main className="session-loading"><Brand/><span>Checking your accountâ€¦</span></main>;
 

@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
     server: { proxy },
   };
 });
