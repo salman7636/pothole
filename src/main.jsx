@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { supabase } from './supabaseClient';
 import { createRoot } from 'react-dom/client';
 
 import {
@@ -70,7 +71,9 @@ const googleMapsUrl = point => point?.latitude != null && point?.longitude != nu
 
 async function request(path, options = {}) {
 
-  const token = sessionStorage.getItem('pv_token');
+  const { data: sessionData } = await supabase?.auth.getSession() || { data: { session: null } };
+  const token = sessionData.session?.access_token || sessionStorage.getItem('pv_token');
+  if (token) sessionStorage.setItem('pv_token', token);
 
   const headers = new Headers(options.headers || {});
 
@@ -170,23 +173,23 @@ function Login({ onLogin }) {
 
     event.preventDefault(); setBusy(true); setError('');
 
-    const registering = mode === 'register'; const path = registering ? '/auth/register' : '/auth/login';
-
     try {
-
-      const data = await request(path, { method: 'POST', body: JSON.stringify(registering ? { name, email, password } : { email, password }) });
-
-      const token = data.access_token || data.token || data.accessToken;
-
-      if (token) sessionStorage.setItem('pv_token', token);
-
+      if (!supabase) throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the frontend deployment settings.');
+      const registering = mode === 'register';
+      const { data, error: authError } = registering
+        ? await supabase.auth.signUp({ email, password, options: { data: { name, full_name: name } } })
+        : await supabase.auth.signInWithPassword({ email, password });
+      if (authError) throw authError;
+      const token = data.session?.access_token;
+      if (!token) {
+        setError('Account created. Check your email to confirm it, then sign in.');
+        return;
+      }
+      sessionStorage.setItem('pv_token', token);
       sessionStorage.setItem('pv_dashboard_mode', 'citizen');
-
-      const authenticatedUser = data.user || { name, email };
-
+      const authenticatedUser = { id: data.user.id, name: data.user.user_metadata?.name || name || email.split('@')[0], email, role: 'CITIZEN' };
       sessionStorage.setItem('pv_user', JSON.stringify(authenticatedUser)); onLogin(authenticatedUser);
-
-    } catch (err) { setError(err.message.includes('HTTP 401') ? 'Email or password is incorrect. If you are new, create an account first.' : err.message); }
+    } catch (err) { setError(err.message || 'Could not authenticate. Check your Supabase settings and try again.'); }
 
     finally { setBusy(false); }
 
@@ -969,11 +972,11 @@ function App() {
   useEffect(()=>{localStorage.setItem('pv_theme',themePreference);const media=window.matchMedia?.('(prefers-color-scheme: dark)');if(!media)return;const update=event=>setSystemDark(event.matches);setSystemDark(media.matches);media.addEventListener?.('change',update);return()=>media.removeEventListener?.('change',update)},[themePreference]);
 
 
-  useEffect(()=>{if(!sessionStorage.getItem('pv_token'))return;request('/auth/me').then(profile=>{if(sessionStorage.getItem('pv_dashboard_mode')==='citizen')profile.role='CITIZEN';sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile)}).catch(error=>{if(error.message.includes('HTTP 401')){sessionStorage.removeItem('pv_token');sessionStorage.removeItem('pv_user');setUser(null)}}).finally(()=>setAuthChecking(false))},[]);
+  useEffect(()=>{let cancelled=false;supabase?.auth.getSession().then(({data})=>{const session=data.session;const token=session?.access_token;if(token){sessionStorage.setItem('pv_token',token);sessionStorage.setItem('pv_dashboard_mode','citizen');const profile={id:session.user.id,email:session.user.email,name:session.user.user_metadata?.name||session.user.email.split('@')[0],role:'CITIZEN'};sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile);}}).finally(()=>{if(!cancelled){const token=sessionStorage.getItem('pv_token');if(!token){setAuthChecking(false);return;}request('/auth/me').then(profile=>{if(sessionStorage.getItem('pv_dashboard_mode')==='citizen')profile.role='CITIZEN';sessionStorage.setItem('pv_user',JSON.stringify(profile));setUser(profile)}).catch(error=>{if(error.message.includes('HTTP 401')){sessionStorage.removeItem('pv_token');sessionStorage.removeItem('pv_user');setUser(null)}}).finally(()=>setAuthChecking(false));}});return()=>{cancelled=true}},[]);
 
   const theme=themePreference==='system'?(systemDark?'dark':'light'):themePreference;
 
-  function logout(){['pv_token','pv_user','pv_citizen_token','pv_citizen_user','pv_official_token','pv_official_user','pv_dashboard_mode'].forEach(key=>sessionStorage.removeItem(key));setUser(null)}
+  function logout(){supabase?.auth.signOut();['pv_token','pv_user','pv_citizen_token','pv_citizen_user','pv_official_token','pv_official_user','pv_dashboard_mode'].forEach(key=>sessionStorage.removeItem(key));setUser(null)}
 
   if(authChecking)return <main className="session-loading"><Brand/><span>Checking your accountâ€¦</span></main>;
 
