@@ -99,7 +99,7 @@ allowed_origins = {
     origin.strip().rstrip("/")
     for origin in os.getenv(
         "CORS_ORIGINS",
-        "http://localhost:3000,http://127.0.0.1:3000,https://potholevision-seven.vercel.app",
+        "http://localhost:3000,http://127.0.0.1:3000,https://pothole-dun.vercel.app",
     ).split(",")
     if origin.strip()
 }

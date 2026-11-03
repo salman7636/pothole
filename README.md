@@ -87,16 +87,23 @@ The live map shows public-safe location, severity, and status data for GPS-tagge
 
 ### Deploy the FastAPI service separately
 
-The Vite frontend on Vercel does not run this Python API. The backend includes a Dockerfile at `backend/Dockerfile`, so deploy the `backend` folder as a container service on a Python-capable host. Configure these backend environment variables there:
+The Vite frontend on Vercel does not run this Python API. The backend includes a Dockerfile at `backend/Dockerfile`. One deployment path is Railway:
 
-- `DATABASE_URL`: Supabase PostgreSQL Session pooler connection string.
-- `SUPABASE_URL`: the Supabase project URL.
-- `SUPABASE_ANON_KEY`: the Supabase publishable key used by the frontend.
-- `JWT_SECRET_KEY`: a long random secret.
-- `CORS_ORIGINS`: the exact deployed frontend origin, such as `https://potholevision-seven.vercel.app`.
-- `OFFICIAL_ACCESS_CODE` and `OFFICIAL_ACCESS_EMAILS`: optional official dashboard access settings.
+1. Push the repository, including `backend/Dockerfile`, to GitHub.
+2. In Railway, create a project from that GitHub repository. Set the service root directory to `/backend`; Railway will detect the Dockerfile there.
+3. Add these variables to the backend service. Find the PostgreSQL connection string from the Supabase project's **Connect → Session pooler** panel. Keep its password private.
 
-After the service deploys, use its generated HTTPS domain as `VITE_API_URL` in the Vercel project settings and redeploy the frontend. If the host uses ephemeral disks, attach persistent storage for `/app/uploads` or move media to Supabase Storage; otherwise uploaded images and videos may disappear after a restart.
+   - `DATABASE_URL`: Supabase PostgreSQL Session pooler connection string.
+   - `SUPABASE_URL`: Supabase project URL.
+   - `SUPABASE_ANON_KEY`: Supabase publishable key.
+   - `JWT_SECRET_KEY`: a long random secret.
+   - `CORS_ORIGINS`: `https://pothole-dun.vercel.app`.
+   - `OFFICIAL_ACCESS_CODE` and `OFFICIAL_ACCESS_EMAILS`: optional official dashboard access settings.
+
+4. Deploy the service, then open **Settings → Networking → Public Networking → Generate Domain**. Check that the generated domain's `/health` endpoint responds.
+5. In Vercel, add `VITE_API_URL` with the generated backend HTTPS domain (no `/docs` suffix), then redeploy the frontend.
+
+If the backend host uses ephemeral disks, attach persistent storage at `/app/uploads` or move media to Supabase Storage; otherwise uploaded images and videos may disappear after a restart.
 
 ## API routes used by this frontend
 
