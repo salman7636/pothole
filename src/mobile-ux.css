@@ -1,0 +1,28 @@
+@media(max-width:700px){
+  body{overflow-x:hidden}
+  .login-panel .mobile-brand{top:max(18px,env(safe-area-inset-top));left:50%;width:max-content;max-width:calc(100% - 36px);transform:translateX(-50%)}
+  .login-panel .mobile-brand .brand{gap:9px;justify-content:center}
+  .login-panel .mobile-brand .brand-logo{width:62px;height:62px}
+  .login-panel .mobile-brand .brand-wordmark.show-name{display:block;margin-left:0;color:#20211c!important;font-size:19px;letter-spacing:-.7px;line-height:1.05}
+  .login-panel .mobile-brand .brand-wordmark.show-name .brand-accent{color:#d73530!important}
+  .login-panel .mobile-brand .brand-wordmark.show-name small{display:none}
+  .app-shell{min-height:100svh}
+  .app-shell .main-area{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
+  .app-shell .topbar{padding-top:env(safe-area-inset-top)}
+  .app-shell .content{width:100%;padding-right:max(13px,env(safe-area-inset-right));padding-left:max(13px,env(safe-area-inset-left))}
+  .app-shell input:not([type="checkbox"]):not([type="radio"]),.app-shell select,.app-shell textarea,.login-page input{font-size:16px!important}
+  .table-wrap,.official-live-grid,.official-chat-messages,.map-report-list{max-width:100%;-webkit-overflow-scrolling:touch}
+  .table-wrap{overflow-x:auto}
+  .official-modal{max-height:calc(100svh - 32px);overflow-y:auto;overscroll-behavior:contain}
+  .mobile-nav{padding-bottom:calc(5px + env(safe-area-inset-bottom))}
+  .profile-menu{max-height:calc(100svh - 110px - env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+  .app-shell .mobile-nav:has(>button:nth-of-type(6)):not(:has(>button:nth-of-type(7))){grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding-left:5px;padding-right:5px}
+  .app-shell .mobile-nav:has(>button:nth-of-type(6)):not(:has(>button:nth-of-type(7)))>button{font-size:8px;letter-spacing:-.2px}
+  .app-shell .mobile-nav:has(>button:nth-of-type(6)):not(:has(>button:nth-of-type(7)))>button svg{width:16px;height:16px}
+}
+
+@media(max-width:380px){
+  .mobile-top-brand .brand-logo{width:31px}
+  .mobile-top-brand .brand-wordmark.show-name{font-size:11px}
+  .top-actions{gap:5px}
+}

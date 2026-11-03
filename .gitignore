@@ -1,0 +1,10 @@
+﻿node_modules/
+dist/
+.npm-cache/
+.env
+backend/.env
+backend/.venv/
+backend/__pycache__/
+backend/models/__pycache__/
+backend/potholevision.db
+backend/uploads/
