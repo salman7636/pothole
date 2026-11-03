@@ -2,9 +2,17 @@ import os
 import math
 import logging
 import hmac
+import sys
 from pathlib import Path
 from datetime import datetime
 from uuid import uuid4
+
+# Vercel imports this module as ``backend.main`` from the repository root,
+# while the local app is normally started from the backend directory. Keep
+# the existing sibling imports (database, auth, models) working in both.
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 from fastapi import FastAPI, Depends, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -64,7 +72,6 @@ with engine.begin() as connection:
 # AI MODEL
 # =========================================================
 
-BACKEND_DIR = Path(__file__).resolve().parent
 detector = PotholeDetector(str(BACKEND_DIR / "models" / "best.pt"))
 
 
