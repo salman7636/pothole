@@ -190,7 +190,12 @@ function Login({ onLogin }) {
       sessionStorage.setItem('pv_dashboard_mode', 'citizen');
       const authenticatedUser = { id: data.user.id, name: data.user.user_metadata?.name || name || email.split('@')[0], email, role: 'CITIZEN' };
       sessionStorage.setItem('pv_user', JSON.stringify(authenticatedUser)); onLogin(authenticatedUser);
-    } catch (err) { setError(err.message || 'Could not authenticate. Check your Supabase settings and try again.'); }
+    } catch (err) {
+      const message = err.message || 'Could not authenticate. Try again.';
+      setError(message.toLowerCase().includes('invalid login credentials')
+        ? 'Email or password did not match a Supabase account. If this account was created before Supabase sign-in was enabled, choose “Create an account” to register it in Supabase. Check your email for a confirmation link if you just registered.'
+        : message);
+    }
 
     finally { setBusy(false); }
 
