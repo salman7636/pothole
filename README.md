@@ -85,6 +85,19 @@ The live map shows public-safe location, severity, and status data for GPS-tagge
 - `JWT_SECRET_KEY` is set to a local development value in the example. Replace it with a long random secret before making the backend public.
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the frontend environment for Supabase Auth. Set `VITE_API_URL` to the URL of a deployed FastAPI service for reports, maps, AI detection, complaints, and administration. There is no production API default.
 
+### Deploy the FastAPI service separately
+
+The Vite frontend on Vercel does not run this Python API. The backend includes a Dockerfile at `backend/Dockerfile`, so deploy the `backend` folder as a container service on a Python-capable host. Configure these backend environment variables there:
+
+- `DATABASE_URL`: Supabase PostgreSQL Session pooler connection string.
+- `SUPABASE_URL`: the Supabase project URL.
+- `SUPABASE_ANON_KEY`: the Supabase publishable key used by the frontend.
+- `JWT_SECRET_KEY`: a long random secret.
+- `CORS_ORIGINS`: the exact deployed frontend origin, such as `https://potholevision-seven.vercel.app`.
+- `OFFICIAL_ACCESS_CODE` and `OFFICIAL_ACCESS_EMAILS`: optional official dashboard access settings.
+
+After the service deploys, use its generated HTTPS domain as `VITE_API_URL` in the Vercel project settings and redeploy the frontend. If the host uses ephemeral disks, attach persistent storage for `/app/uploads` or move media to Supabase Storage; otherwise uploaded images and videos may disappear after a restart.
+
 ## API routes used by this frontend
 
 `/auth/register`, `/auth/login`, `/potholes`, `/potholes/{id}/status`, `/detect/image`, `/detect/video`, `/videos/{filename}`, `/map/potholes`, `/map/summary`, `/progress/updates`, `/official/chat/users`, `/official/chat/messages`, `/official/chat/attachments`, `/dashboard/summary`, `/analytics`, `/complaints`, `/inspections`, and `/work-orders`.
