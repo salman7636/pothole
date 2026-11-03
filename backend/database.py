@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-load_dotenv(Path(__file__).resolve().with_name(".env"))
+BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR.parent / ".env")
 
 DEFAULT_SQLITE_PATH = Path(__file__).resolve().with_name("potholevision.db")
 DATABASE_URL = os.getenv(

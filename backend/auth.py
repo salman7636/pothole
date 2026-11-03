@@ -4,6 +4,8 @@ import json
 import secrets
 import urllib.request
 import urllib.error
+from pathlib import Path
+from dotenv import load_dotenv
 
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -12,10 +14,23 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models.user import User
 
+BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR.parent / ".env")
+
 security = HTTPBearer()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_URL = (
+    os.getenv("SUPABASE_URL")
+    or os.getenv("VITE_SUPABASE_URL")
+    or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+)
+SUPABASE_ANON_KEY = (
+    os.getenv("SUPABASE_ANON_KEY")
+    or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
+    or os.getenv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
+    or os.getenv("VITE_SUPABASE_ANON_KEY")
+)
 
 
 def verify_supabase_token(token: str):
