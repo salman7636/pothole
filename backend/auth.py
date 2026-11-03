@@ -1,61 +1,55 @@
+
 import os
+import json
+import secrets
+import urllib.request
+import urllib.error
 
-from datetime import datetime, timedelta, timezone
-
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models.user import User
 
-
-# =========================================================
-# AUTH CONFIG
-# =========================================================
-
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "local-development-only-change-this-key")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-)
-
 security = HTTPBearer()
 
-
-# =========================================================
-# PASSWORD HELPERS
-# =========================================================
-
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 
 
-def verify_password(password: str, password_hash: str) -> bool:
-    return pwd_context.verify(password, password_hash)
+def verify_supabase_token(token: str):
+    if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="Supabase environment variables are missing"
+        )
 
+    url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/user"
 
-# =========================================================
-# JWT HELPERS
-# =========================================================
-
-def create_access_token(user_id: int, role: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    request = urllib.request.Request(
+        url,
+        headers={
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": f"Bearer {token}",
+        },
+        method="GET",
     )
 
-    payload = {
-        "sub": str(user_id),
-        "role": role,
-        "exp": expire,
-    }
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            return json.loads(response.read().decode("utf-8"))
 
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    except urllib.error.HTTPError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired Supabase token"
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=503,
+            detail="Unable to verify Supabase authentication"
+        )
 
 
 def get_current_user(
@@ -63,51 +57,51 @@ def get_current_user(
     db: Session = Depends(get_db),
 ):
     token = credentials.credentials
+    supabase_user = verify_supabase_token(token)
 
-    try:
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-        )
+    email = supabase_user.get("email")
 
-        user_id = payload.get("sub")
-
-        if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication token",
-            )
-
-    except JWTError:
+    if not email:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired authentication token",
+            status_code=401,
+            detail="Supabase account has no email"
         )
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    user = db.query(User).filter(
+        User.email == email
+    ).first()
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
+        metadata = supabase_user.get("user_metadata") or {}
+
+        name = (
+            metadata.get("full_name")
+            or metadata.get("name")
+            or email.split("@")[0]
         )
+
+        user = User(
+            name=name,
+            email=email,
+            password_hash=secrets.token_urlsafe(48),
+            role="CITIZEN",
+        )
+
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     return user
 
 
-# =========================================================
-# ROLE CHECK
-# =========================================================
-
 def require_roles(*allowed_roles):
     def role_checker(
-        current_user: User = Depends(get_current_user),
+        current_user: User = Depends(get_current_user)
     ):
         if current_user.role not in allowed_roles:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to access this resource",
+                status_code=403,
+                detail="You do not have permission to access this resource"
             )
 
         return current_user
