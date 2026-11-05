@@ -5,11 +5,13 @@ import secrets
 import urllib.request
 import urllib.error
 from pathlib import Path
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from jose import jwt, JWTError
 
 from database import get_db
 from models.user import User
@@ -19,18 +21,47 @@ load_dotenv(BACKEND_DIR / ".env")
 load_dotenv(BACKEND_DIR.parent / ".env")
 
 security = HTTPBearer()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY") or os.getenv("JWT_SECRET", "change-this-secret")
+ALGORITHM = "HS256"
 
 SUPABASE_URL = (
     os.getenv("SUPABASE_URL")
     or os.getenv("VITE_SUPABASE_URL")
     or os.getenv("NEXT_PUBLIC_SUPABASE_URL")
 )
+
 SUPABASE_ANON_KEY = (
     os.getenv("SUPABASE_ANON_KEY")
     or os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
     or os.getenv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")
     or os.getenv("VITE_SUPABASE_ANON_KEY")
 )
+
+
+def hash_password(password: str):
+    return pwd_context.hash(password)
+
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def create_access_token(data: dict | None = None, user_id: int | None = None, role: str | None = None):
+    # Support both a payload and the keyword/positional form used by main.py.
+    if data is not None and not isinstance(data, dict):
+        # Existing official-access call passes (user_id, role) positionally.
+        role = role or (user_id if isinstance(user_id, str) else None)
+        user_id = int(data)
+        payload = {}
+    else:
+        payload = dict(data or {})
+    if user_id is not None:
+        payload["sub"] = str(user_id)
+    if role is not None:
+        payload["role"] = role
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def verify_supabase_token(token: str):
@@ -72,6 +103,20 @@ def get_current_user(
     db: Session = Depends(get_db),
 ):
     token = credentials.credentials
+    # First accept tokens issued by this API's email/password login. Supabase
+    # tokens are then verified remotely as before.
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload.get("sub", ""))
+    except (JWTError, TypeError, ValueError):
+        payload = None
+
+    if payload is not None:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is None:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        return user
+
     supabase_user = verify_supabase_token(token)
 
     email = supabase_user.get("email")
@@ -82,13 +127,10 @@ def get_current_user(
             detail="Supabase account has no email"
         )
 
-    user = db.query(User).filter(
-        User.email == email
-    ).first()
+    user = db.query(User).filter(User.email == email).first()
 
     if not user:
         metadata = supabase_user.get("user_metadata") or {}
-
         name = (
             metadata.get("full_name")
             or metadata.get("name")
